@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 from models import storage
 
+
 class BaseModel:
     """The definition of the base class"""
 
@@ -38,8 +39,10 @@ class BaseModel:
 
     def to_dict(self):
         """To  get dictionnary representation of self"""
-        mydict = self.__dict__
-        mydict["__class__"] = "BaseModel"
-        mydict["created_at"] = str(self.created_at.isoformat())
-        mydict["updated_at"] = str(self.updated_at.isoformat())
+        mydict = self.__dict__.copy()
+        mydict['__class__'] = "BaseModel"
+        creat = self.created_at.isoformat()
+        upd = self.updated_at.isoformat()
+        mydict['created_at'] = creat
+        mydict['updated_at'] = upd
         return mydict

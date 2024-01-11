@@ -22,7 +22,11 @@ class FileStorage:
         """To save objects if file path"""
         to_save = dict()
         for key, value in self.__objects.items():
-            to_save[key] = value.to_dict()
+            if type(value) is not dict:
+                value_dict = value.to_dict()
+                to_save[key] = value_dict
+            else:
+                to_save[key] = value
         with open(self.__file_path, 'w', encoding="utf-8") as f:
             json.dump(to_save, f)
 
@@ -31,6 +35,7 @@ class FileStorage:
         try:
             with open(self.__file_path, 'r', encoding='utf-8') as f:
                 in_file = f.read()
-            self.__objects = json.loads(in_file)
+            if in_file is not None and len(in_file) != 0:
+                self.__objects = json.loads(in_file)
         except FileNotFoundError:
             pass
