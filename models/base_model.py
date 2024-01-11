@@ -2,6 +2,7 @@
 """My base class, all common attributes and methodes are here"""
 import uuid
 from datetime import datetime
+from models import storage
 
 class BaseModel:
     """The definition of the base class"""
@@ -10,12 +11,21 @@ class BaseModel:
         """
         To initalize common attributes
         """
-        if kwargs is  not None:
-           for key, value in kwargs.items():
-               if k
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+        if kwargs is not None or kwargs:
+            for key, value in kwargs.items():
+                if key != "__class__":
+                    if key == "id":
+                        self.id = value
+                    elif key == "created_at":
+                        self.created_at = datetime.fromisoformat(value)
+                    elif key == "updated_at":
+                        self.updated_at = datetime.fromisoformat(value)
+                    else:
+                        self.key = value
+        storage.new(self)
 
     def __str__(self):
         """Overriding str func"""
@@ -24,11 +34,12 @@ class BaseModel:
     def save(self):
         """ To update attribute updated_at"""
         self.updated_at = datetime.now()
+        storage.save()
 
     def to_dict(self):
         """To  get dictionnary representation of self"""
         mydict = self.__dict__
         mydict["__class__"] = "BaseModel"
-        mydict["created_at"] = (self.created_at).isoformat()
-        mydict["updated_at"] = self.updated_at.isoformat()
+        mydict["created_at"] = str(self.created_at.isoformat())
+        mydict["updated_at"] = str(self.updated_at.isoformat())
         return mydict
