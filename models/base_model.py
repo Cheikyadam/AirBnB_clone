@@ -21,11 +21,11 @@ class BaseModel:
            #         if key == "id":
             #            self.id = value
               #      elif key == "created_at":
-             """           self.created_at = datetime.fromisoformat(value)
-                    elif key == "updated_at":
-                        self.updated_at = datetime.fromisoformat(value)
-                    else:
-                        self.key = value"""
+            #           self.created_at = datetime.fromisoformat(value)
+             #       elif key == "updated_at":
+             #           self.updated_at = datetime.fromisoformat(value)
+              #      else:
+               #         self.key = value"""
         storage.new(self)
 
     def __str__(self):
