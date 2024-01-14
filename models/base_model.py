@@ -30,7 +30,8 @@ class BaseModel:
 
     def __str__(self):
         """Overriding str func"""
-        return f"[BaseModel] ({self.id}) {self.__dict__}"
+        class_name = self.__class__.__name__
+        return f"[{class_name}] ({self.id}) {self.__dict__}"
 
     def save(self):
         """ To update attribute updated_at"""
@@ -39,8 +40,9 @@ class BaseModel:
 
     def to_dict(self):
         """To  get dictionnary representation of self"""
-        mydict = self.__dict__.copy()
-        mydict['__class__'] = "BaseModel"
+        mydict = dict(self.__dict__)
+        class_name = self.__class__.__name__
+        mydict['__class__'] = class_name
         creat = self.created_at.isoformat()
         upd = self.updated_at.isoformat()
         mydict['created_at'] = creat
