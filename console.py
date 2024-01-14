@@ -3,12 +3,19 @@
 import cmd
 from models.base_model import BaseModel
 from models import storage
+from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
 
 
 class HBNBCommand(cmd.Cmd):
     """Defintion of the class"""
     prompt = "(hbnb) "
     all_inst = []
+    all_cls = ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]
 
     def do_quit(self, arg):
         """Quit Command to exit the program"""
@@ -25,11 +32,24 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, arg):
         """To create a new instance"""
-        if my_helper(arg):
-            model = BaseModel()
-            model.save()
-            self.all_inst.append(model.__str__())
-            print(model.id)
+        if my_helper(arg, self.all_cls):
+            if arg == "BaseModel":
+                inst = BaseModel()
+            elif arg == "User":
+                inst = User()
+            elif arg == "State":
+                inst = State()
+            elif arg == "City":
+                inst = City()
+            elif arg == "Amenity":
+                inst = Amenity()
+            elif arg == "Place":
+                inst = Place()
+            else:
+                inst = Review()
+            inst.save()
+            self.all_inst.append(inst.__str__())
+            print(inst.id)
 
     def do_show(self, arg):
         """To show instances infos"""
@@ -100,13 +120,13 @@ class HBNBCommand(cmd.Cmd):
                             print("""UPDATING""")
 
 
-def my_helper(arg):
+def my_helper(arg, all_class):
     """Function to check if there is an error"""
     args = arg.split(" ")
     if len(arg) == 0:
         print("** class name missing **")
         return False
-    elif args[0] != "BaseModel":
+    elif args[0] not in all_class:
         print("** class doesn't exist **")
         return False
     return True
