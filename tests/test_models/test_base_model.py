@@ -4,7 +4,13 @@ import unittest
 
 class BaseTestCase(unittest.TestCase):
     """Test casee for base model"""
-    pass
-    
+   
+   def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+
 if __name__ == '__main__':
     unittest.main()
