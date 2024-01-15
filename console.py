@@ -14,8 +14,9 @@ from models.review import Review
 class HBNBCommand(cmd.Cmd):
     """Defintion of the class"""
     prompt = "(hbnb) "
-    all_inst = []
-    all_cls = ["BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]
+    all_inst = {}
+    all_cls = [
+        "BaseModel", "User", "State", "City", "Amenity", "Place", "Review"]
 
     def do_quit(self, arg):
         """Quit Command to exit the program"""
@@ -33,67 +34,76 @@ class HBNBCommand(cmd.Cmd):
     def do_create(self, arg):
         """To create a new instance"""
         if my_helper(arg, self.all_cls):
-            if arg == "BaseModel":
-                inst = BaseModel()
-            elif arg == "User":
-                inst = User()
-            elif arg == "State":
-                inst = State()
-            elif arg == "City":
-                inst = City()
-            elif arg == "Amenity":
-                inst = Amenity()
-            elif arg == "Place":
-                inst = Place()
-            else:
-                inst = Review()
+            inst = creating(arg, {})
             inst.save()
-            self.all_inst.append(inst.__str__())
             print(inst.id)
 
     def do_show(self, arg):
         """To show instances infos"""
-        if my_helper(arg):
+        if my_helper(arg, self.all_cls):
             args = arg.split(" ")
             if len(args) == 1:
                 print("** instance id missing **")
             else:
                 ins_id = args[1]
+                self.all_inst = storage.all()
                 found = False
-                for inst in self.all_inst:
-                    if ins_id in inst:
-                        print(inst)
-                        found = True
-                        break
+                all_it = dict(self.all_inst)
+                for base, inst in all_it.items():
+                    if arg[0] in str(base):
+                        id_ins = inst['id']
+                        if id_ins == ins_id:
+                            new_inst = creating(args[0], inst)
+                            print(new_inst)
+                            found = True
+                            break
                 if found is False:
                     print("** no instance found **")
 
     def do_destroy(self, arg):
         """To destroy an instance id"""
-        if my_helper(arg):
+        if my_helper(arg, self.all_cls):
             args = arg.split(" ")
             if len(args) == 1:
                 print("** instance id missing **")
             else:
                 ins_id = args[1]
+                self.all_inst = storage.all()
                 found = False
-                for inst in self.all_inst:
-                    if ins_id in inst:
-                        all_inst.remove(inst)
-                        found = True
-                        break
+                all_it = dict(self.all_inst)
+                for base, inst in all_it.items():
+                    if arg[0] in str(base):
+                        id_ins = inst['id']
+                        if id_ins == ins_id:
+                            del self.all_inst[base]
+                            storage.save()
+                            found = True
+                            break
                 if found is False:
                     print("** no instance found **")
 
     def do_all(self, arg):
         """To print all instances of a class or all instaneces"""
         if len(arg) == 0:
-            print(self.all_inst)
+            self.all_inst = storage.all()
+            all_list = []
+            all_it = dict(self.all_inst)
+            for base, inst in all_it.items():
+                new_inst = creating(base, inst)
+                all_list.append(str(new_inst))
+            print(all_list)
         else:
-            if arg != "BaseModel":
+            if arg not in self.all_cls:
                 print("** class doesn't exist **")
             else:
-                print(self.all_inst)
+                self.all_inst = storage.all()
+                all_list = []
+                all_it = dict(self.all_inst)
+                for base, inst in all_it.items():
+                    if arg in base:
+                        new_inst = creating(base, inst)
+                        all_list.append(str(new_inst))
+                print(all_list)
 
     def do_update(self, arg):
         """Updating an instance"""
@@ -103,11 +113,23 @@ class HBNBCommand(cmd.Cmd):
                 print("** instance id missing **")
             else:
                 ins_id = args[1]
+                self.all_inst = storage.all()
                 found = False
-                for inst in self.all_inst:
-                    if ins_id in inst:
-                        found = True
-                        break
+                all_it = dict(self.all_inst)
+                for base, inst in all_it.items():
+                    if arg[0] in str(base):
+                        id_ins = inst['id']
+                        if id_ins == ins_id:
+                            found = True
+                            if len(args) == 2:
+                                print("** attribute name missing **")
+                            elif len(args) == 3:
+                                print("** value missing **")
+                            else:
+                                updat(base, inst)
+                            break
+                if found is False:
+                    print("** no instance found **")
                 if found is False:
                     print("** no instance found **")
                 else:
@@ -120,6 +142,11 @@ class HBNBCommand(cmd.Cmd):
                             print("""UPDATING""")
 
 
+def updat(base, inst):
+    """To update instances"""
+    pass
+
+
 def my_helper(arg, all_class):
     """Function to check if there is an error"""
     args = arg.split(" ")
@@ -130,6 +157,25 @@ def my_helper(arg, all_class):
         print("** class doesn't exist **")
         return False
     return True
+
+
+def creating(arg, kwargs):
+    """To create instances"""
+    if "BaseModel" in arg:
+        inst = BaseModel(**kwargs)
+    elif "User" in arg:
+        inst = User(**kwargs)
+    elif "State" in arg:
+        inst = State(**kwargs)
+    elif "City" in arg:
+        inst = City(**kwargs)
+    elif "Amenity" in arg:
+        inst = Amenity(**kwargs)
+    elif "Place" in arg:
+        inst = Place(**kwargs)
+    else:
+        inst = Review(**kwargs)
+    return inst
 
 
 if __name__ == '__main__':
