@@ -158,10 +158,11 @@ class HBNBCommand(cmd.Cmd):
             elif com.endswith(".update"):
                 com = com[:-7]
                 if "{" not in arg or "}" not in arg:
-                    arg = arg.split(" ")
                     arg = arg.replace('"', '')
+                    arg = arg.split(" ")
                     for elmt in arg:
                         com += " " + elmt
+                    com = com.replace(',', '')
                     self.do_update(com)
                 else:
                     arg = arg.split("{")
@@ -170,7 +171,8 @@ class HBNBCommand(cmd.Cmd):
                     dico = dico.replace('\'', '"')
                     dico = json.loads(str(dico))
                     for key, value in dico.items():
-                        run = com + " " + str(key) + " " + str(value)
+                        run = com + str(key) + " " + str(value)
+                        print(run)
                         self.do_update(run)
             else:
                 print(f"*** Unknown syntax: {line}")
