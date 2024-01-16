@@ -36,6 +36,35 @@ class FileStorage:
             with open(self.__file_path, 'r', encoding='utf-8') as f:
                 in_file = f.read()
             if in_file is not None and len(in_file) != 0:
-                self.__objects = json.loads(in_file)
+                obj_dic = json.loads(in_file)
+                for key, value in obj_dic.items():
+                    new = creating(key, value)
+                    self.__objects[key] = new
         except FileNotFoundError:
             pass
+
+
+def creating(arg, kwargs):
+    """To create instances"""
+    from models.base_model import BaseModel
+    from models.user import User
+    from models.state import State
+    from models.city import City
+    from models.amenity import Amenity
+    from models.place import Place
+    from models.review import Review
+    if "BaseModel" in arg:
+        inst = BaseModel(**kwargs)
+    elif "User" in arg:
+        inst = User(**kwargs)
+    elif "State" in arg:
+        inst = State(**kwargs)
+    elif "City" in arg:
+        inst = City(**kwargs)
+    elif "Amenity" in arg:
+        inst = Amenity(**kwargs)
+    elif "Place" in arg:
+        inst = Place(**kwargs)
+    else:
+        inst = Review(**kwargs)
+    return inst

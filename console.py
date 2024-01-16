@@ -2,6 +2,7 @@
 """My Cmd with python"""
 import cmd
 from models.base_model import BaseModel
+import json
 from models import storage
 from models.user import User
 from models.state import State
@@ -48,15 +49,11 @@ class HBNBCommand(cmd.Cmd):
                 ins_id = args[1]
                 self.all_inst = storage.all()
                 found = False
-                all_it = dict(self.all_inst)
-                for base, inst in all_it.items():
-                    if arg[0] in str(base):
-                        id_ins = inst['id']
-                        if id_ins == ins_id:
-                            new_inst = creating(args[0], inst)
-                            print(new_inst)
-                            found = True
-                            break
+                for class_name, inst in self.all_inst.items():
+                    if arg[0] in class_name and ins_id in class_name:
+                        print(inst)
+                        found = True
+                        break
                 if found is False:
                     print("** no instance found **")
 
@@ -70,15 +67,12 @@ class HBNBCommand(cmd.Cmd):
                 ins_id = args[1]
                 self.all_inst = storage.all()
                 found = False
-                all_it = dict(self.all_inst)
-                for base, inst in all_it.items():
-                    if arg[0] in str(base):
-                        id_ins = inst['id']
-                        if id_ins == ins_id:
-                            del self.all_inst[base]
-                            storage.save()
-                            found = True
-                            break
+                for class_name, inst in self.all_inst.items():
+                    if arg[0] in class_name and ins_id in class_name:
+                        del self.all_inst[class_name]
+                        storage.save()
+                        found = True
+                        break
                 if found is False:
                     print("** no instance found **")
 
@@ -86,11 +80,9 @@ class HBNBCommand(cmd.Cmd):
         """To print all instances of a class or all instaneces"""
         if len(arg) == 0:
             self.all_inst = storage.all()
-            all_list = []
-            all_it = dict(self.all_inst)
-            for base, inst in all_it.items():
-                new_inst = creating(base, inst)
-                all_list.append(str(new_inst))
+            all_list = list()
+            for class_name, inst in self.all_inst.items():
+                all_list.append(str(inst))
             print(all_list)
         else:
             if arg not in self.all_cls:
@@ -98,11 +90,9 @@ class HBNBCommand(cmd.Cmd):
             else:
                 self.all_inst = storage.all()
                 all_list = []
-                all_it = dict(self.all_inst)
-                for base, inst in all_it.items():
-                    if arg in base:
-                        new_inst = creating(base, inst)
-                        all_list.append(str(new_inst))
+                for cls_id, inst in self.all_inst.items():
+                    if arg in cls_id:
+                        all_list.append(str(inst))
                 print(all_list)
 
     def do_update(self, arg):
@@ -115,36 +105,124 @@ class HBNBCommand(cmd.Cmd):
                 ins_id = args[1]
                 self.all_inst = storage.all()
                 found = False
-                all_it = dict(self.all_inst)
-                for base, inst in all_it.items():
-                    if arg[0] in str(base):
-                        id_ins = inst['id']
-                        if id_ins == ins_id:
-                            found = True
-                            if len(args) == 2:
-                                print("** attribute name missing **")
-                            elif len(args) == 3:
-                                print("** value missing **")
-                            else:
-                                updat(base, inst)
-                            break
-                if found is False:
-                    print("** no instance found **")
-                if found is False:
-                    print("** no instance found **")
-                else:
-                    if len(args) == 2:
-                        print("** attribute name missing **")
-                    else:
-                        if len(args) == 3:
+                for class_id, inst in self.all_inst.items():
+                    if arg[0] in class_id and args[1] in class_id:
+                        found = True
+                        if len(args) == 2:
+                            print("** attribute name missing **")
+                        elif len(args) == 3:
                             print("** value missing **")
                         else:
-                            print("""UPDATING""")
+                            updating(class_id, inst, args)
+                        break
+                if found is False:
+                    print("** no instance found **")
+
+    def default(self, line):
+        """Default actions or commands"""
+        if line.endswith(".all()"):
+            arg = line[:-6]
+            self.do_all(arg)
+        elif line.endswith(".count()"):
+            arg = line[:-8]
+            if arg in self.all_cls:
+                self.all_inst = storage.all()
+                list_key = list(self.all_inst.keys())
+                count = 0
+                for elmt in list_key:
+                    if arg in elmt:
+                        count += 1
+                print(count)
+            else:
+                print("** class doesn't exist **")
+        else:
+            for i in range(0, len(line)):
+                if line[i] == '(':
+                    break
+            arg = line[i:]
+            com = line[:i]
+            arg = arg.replace('(', '')
+            arg = arg.replace(')', '')
+            if com.endswith(".show"):
+                com = com[:-5]
+                arg = arg.replace('"', '')
+                if len(arg) != 0:
+                    com = com + " " + arg
+                self.do_show(com)
+            elif com.endswith(".destroy"):
+                com = com[:-8]
+                arg = arg.replace('"', '')
+                if len(arg) != 0:
+                    com = com + " " + arg
+                self.do_destroy(com)
+            elif com.endswith(".update"):
+                com = com[:-7]
+                if "{" not in arg or "}" not in arg:
+                    arg = arg.split(" ")
+                    arg = arg.replace('"', '')
+                    for elmt in arg:
+                        com += " " + elmt
+                    self.do_update(com)
+                else:
+                    arg = arg.split("{")
+                    com = com + " " + arg[0].replace('"', '').replace(',', '')
+                    dico = "{" + arg[1]
+                    dico = dico.replace('\'', '"')
+                    dico = json.loads(str(dico))
+                    for key, value in dico.items():
+                        run = com + " " + str(key) + " " + str(value)
+                        self.do_update(run)
+            else:
+                print(f"*** Unknown syntax: {line}")
 
 
-def updat(base, inst):
-    """To update instances"""
-    pass
+def updating(class_id, inst, args):
+    attribute = str(args[2])
+    value = args[3]
+    change = False
+    if "BaseModel" in class_id:
+        setattr(inst, attribute, value)
+        change = True
+    elif "User" in class_id:
+        if attribute in vars(User).keys():
+            setattr(inst, attribute, value)
+            change = True
+    elif "State" in class_id:
+        if attribute == "name":
+            setattr(inst, attribute, value)
+            change = True
+    elif "City" in class_id:
+        if attribute == "name":
+            setattr(inst, attribute, value)
+            change = True
+    elif "Amenity" in class_id:
+        if attribute == "name":
+            setattr(inst, attribute, value)
+            change = True
+    elif "Review" in class_id:
+        if attribute == "text":
+            setattr(inst, attribute, value)
+            change = True
+    elif "Place" in class_id:
+        list_int = ["number_rooms", "number_bathrooms", "max_guest",
+                    "price_by_night"]
+        if attribute in ["name", "description"]:
+            setattr(inst, attribute, value)
+            change = True
+        elif attribute in ["latitue", "longitude"]:
+            try:
+                setattr(inst, attribute, float(value))
+                change = True
+            except ValueError:
+                pass
+        elif attribute in list_int:
+            try:
+                setattr(inst, attribute, int(value))
+                change = True
+            except ValueError:
+                pass
+    if change is True:
+        inst.save()
 
 
 def my_helper(arg, all_class):
