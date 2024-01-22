@@ -1,0 +1,19 @@
+header {
+	background-color: #FFFFFF;
+	height: 70px;
+	width: 100%;
+	border-bottom: 1px #CCCCCC;
+	display: flex;
+	align-items: center;
+}
+
+header::before{
+	content: "";
+	display: block;
+	width: 142px;
+ 	height: 60px;
+	background-image: url("../images/logo.png");
+	background-size: cover;
+	background-position: center center;	
+	margin-left: 20px;
+}
